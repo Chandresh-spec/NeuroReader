@@ -1,0 +1,1 @@
+web: gunicorn neurorezsquad.wsgi:application
