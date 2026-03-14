@@ -1,1 +1,1 @@
-web: gunicorn neurorezsquad.wsgi:application
+web: gunicorn Zsquad.wsgi:application
