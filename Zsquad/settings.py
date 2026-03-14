@@ -47,7 +47,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",      # ← MUST be first in middleware list
+    "corsheaders.middleware.CorsMiddleware",  
+    'whitenoise.middleware.WhiteNoiseMiddleware',    # ← MUST be first in middleware list
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -162,10 +163,8 @@ TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
-
-# Static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # Media files — user uploaded files stored here
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -176,3 +175,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # HuggingFace Inference API key
 HF_API_KEY = os.getenv("HF_API_KEY", "")
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
