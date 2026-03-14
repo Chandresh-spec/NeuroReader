@@ -580,7 +580,7 @@
     <div id="status"></div>
 
     <script>
-        const API_BASE = "http://127.0.0.1:8000/api/auth";
+        const API_BASE = "https://neuroreader-kqqt.onrender.com/api/auth";
 
         function showStatus(msg, type) {
             const el = document.getElementById("status");
@@ -594,7 +594,7 @@
 
         async function loadSmartSettings(token) {
             try {
-                const res = await fetch("http://127.0.0.1:8000/api/preferences/settings/", {
+                const res = await fetch("https://neuroreader-kqqt.onrender.com/api/preferences/settings/", {
                     method: "GET",
                     headers: { "Authorization": `Bearer ${token}` }
                 });
@@ -653,7 +653,7 @@
                 document.getElementById("avatarLetter").textContent = user.full_name[0].toUpperCase();
 
                 // Load User Preferences
-                const prefRes = await fetch("http://127.0.0.1:8000/api/preferences/", {
+                const prefRes = await fetch("https://neuroreader-kqqt.onrender.com/api/preferences/", {
                     method: "GET",
                     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
                 });
@@ -678,7 +678,7 @@
             if (!token) return;
 
             try {
-                const res = await fetch("http://127.0.0.1:8000/api/preferences/", {
+                const res = await fetch("https://neuroreader-kqqt.onrender.com/api/preferences/", {
                     method: "PATCH",
                     headers: {
                         "Content-Type": "application/json",
