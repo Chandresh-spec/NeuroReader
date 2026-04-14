@@ -13,6 +13,11 @@
         rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- MediaPipe Face Detection for Smart Attention -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+
 
     <style>
         /* =====================================================
@@ -2996,6 +3001,12 @@
                                 <div class="toggle-track"></div>
                                 <div class="toggle-thumb"></div>
                             </label>
+                        <div class="toggle-row"><span class="toggle-label" style="font-weight:600; color:var(--accent);">Smart Attention Mode 📷</span>
+                            <label class="toggle-switch"><input type="checkbox" id="toggle-smart-attention" role="switch">
+                                <div class="toggle-track"></div>
+                                <div class="toggle-thumb"></div>
+                            </label>
+                            <p style="font-size:11px;color:var(--text-muted);margin-top:2px;">Pauses TTS if you look away for 5s. Requires webcam.</p>
                         </div>
                     </div>
                     <div class="panel-section" role="group">
@@ -3064,17 +3075,30 @@
             <button class="tts-btn play" id="tts-play" aria-label="Play/Pause">▶</button>
             <button class="tts-btn" id="tts-skip" aria-label="Skip sentence">⏭</button>
         </div>
-        <div class="tts-progress" role="progressbar" aria-label="TTS progress" aria-valuenow="0" aria-valuemin="0"
-            aria-valuemax="100">
+        <div class="tts-progress" role="progressbar" aria-label="TTS progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
             <div class="tts-progress-fill" id="tts-progress-fill"></div>
         </div>
-        <div class="tts-speed">
+        
+        <!-- Speed Presets -->
+        <div class="tts-speed-presets" style="display:flex; gap:4px; margin: 0 8px;">
+            <button class="tts-btn" id="btn-speed-1" style="width:auto; padding:0 8px; font-weight:bold; font-size:12px; border-radius:12px;">1x</button>
+            <button class="tts-btn" id="btn-speed-15" style="width:auto; padding:0 8px; font-weight:bold; font-size:12px; border-radius:12px;">1.5x</button>
+            <button class="tts-btn" id="btn-speed-2" style="width:auto; padding:0 8px; font-weight:bold; font-size:12px; border-radius:12px;">2x</button>
+        </div>
+
+        <div class="tts-speed" style="display:none;">
             <span aria-hidden="true">🐢</span>
-            <input type="range" id="tts-rate" min="0.5" max="2.0" value="1.0" step="0.1" aria-label="Speech rate"
-                style="width:64px">
+            <input type="range" id="tts-rate" min="0.5" max="2.0" value="1.0" step="0.1" aria-label="Speech rate" style="width:64px">
             <span aria-hidden="true">🐇</span>
         </div>
         <span class="tts-status" id="tts-status" aria-live="polite">Ready</span>
+    </div>
+
+    <!-- Smart Attention Overlay -->
+    <div id="smart-attention-overlay" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--bg-card); border:2px solid var(--accent); border-radius:var(--radius-lg); padding:20px 30px; box-shadow:0 10px 40px var(--shadow-md); z-index:9999; text-align:center; flex-direction:column; align-items:center; gap:10px;">
+        <div style="font-size:32px;">👀</div>
+        <div style="font-size:18px; font-weight:600; color:var(--text-primary);">Paused because you are looking away</div>
+        <div style="font-size:13px; color:var(--text-muted);">Look back at the screen to resume automatically</div>
     </div>
 
     <!-- PDF.js from CDN (for PDF text extraction) -->
@@ -3719,7 +3743,20 @@
                 rv.style.display = 'flex'; rv.classList.add('active');
 
                 if (FocusMode.active) FocusMode.initLines();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // --- Auto Resume ---
+                const prog = DS.progress()[book.id] || 0;
+                if (prog > 0 && !(book.isPDF && this.pdfPages)) {
+                    setTimeout(() => {
+                        const textEl = document.getElementById('reading-text');
+                        const total = textEl.scrollHeight;
+                        const pixelPos = (prog / 100) * total;
+                        window.scrollTo({ top: pixelPos, behavior: 'smooth' });
+                    }, 100);
+                } else if (!book.isPDF) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+
                 document.getElementById('reader-title').focus();
                 TTS.stop();
                 History.add(book.id);
@@ -3969,10 +4006,25 @@
                 document.getElementById('tts-skip').addEventListener('click', () => this.skip());
                 document.getElementById('tts-rate').addEventListener('input', e => {
                     this.rate = parseFloat(e.target.value); Prefs.save('ttsRate', this.rate);
+                    this.updateSpeedPresetsUI();
                     if (this.playing) { const i = this.sentIdx; this.stop(); this.sentIdx = i; this.speakFrom(i); }
+                });
+                
+                ['1', '15', '2'].forEach(speed => {
+                    const btn = document.getElementById(`btn-speed-${speed}`);
+                    if(btn) {
+                        btn.addEventListener('click', () => {
+                            const val = speed === '1' ? 1.0 : (speed === '15' ? 1.5 : 2.0);
+                            this.rate = val; Prefs.save('ttsRate', this.rate);
+                            document.getElementById('tts-rate').value = val;
+                            this.updateSpeedPresetsUI();
+                            if (this.playing) { const i = this.sentIdx; this.stop(); this.sentIdx = i; this.speakFrom(i); }
+                        });
+                    }
                 });
                 this.rate = Prefs.get('ttsRate') || 1.0;
                 document.getElementById('tts-rate').value = this.rate;
+                this.updateSpeedPresetsUI();
                 this.wordHL = Prefs.get('ttsHL') !== false;
             },
             toggle() { if (this.playing) this.pause(); else this.play(); },
@@ -4014,6 +4066,111 @@
                 document.getElementById('tts-progress-fill').style.width = pct + '%';
                 document.getElementById('tts-progress-fill').parentElement.setAttribute('aria-valuenow', Math.round(pct));
                 if (this.playing) requestAnimationFrame(() => this.updateProgress());
+            },
+            updateSpeedPresetsUI() {
+                ['1', '15', '2'].forEach(speed => {
+                    const btn = document.getElementById(`btn-speed-${speed}`);
+                    if(btn) btn.style.background = 'transparent';
+                });
+                let activeId = 'btn-speed-1';
+                if (this.rate >= 1.4 && this.rate <= 1.6) activeId = 'btn-speed-15';
+                if (this.rate >= 1.9) activeId = 'btn-speed-2';
+                const activeBtn = document.getElementById(activeId);
+                if(activeBtn) activeBtn.style.background = 'var(--accent-light)';
+            }
+        };
+
+        /* ── SMART ATTENTION (WEBCAM) ──────────────────────────────── */
+        const SmartAttention = {
+            enabled: false,
+            videoEl: null,
+            camera: null,
+            faceDetection: null,
+            lastFaceTime: Date.now(),
+            checkInterval: null,
+            isAway: false,
+            init() {
+                const toggle = document.getElementById('toggle-smart-attention');
+                if(!toggle) return;
+                toggle.addEventListener('change', (e) => {
+                    this.enabled = e.target.checked;
+                    if(this.enabled) {
+                        toast("Initializing Smart Attention... Please allow camera access.");
+                        this.startTracker();
+                    } else {
+                        this.stopTracker();
+                        this.resumeActivity();
+                    }
+                });
+            },
+            startTracker() {
+                if(!this.videoEl) {
+                    this.videoEl = document.createElement('video');
+                    this.videoEl.style.display = 'none';
+                    document.body.appendChild(this.videoEl);
+                }
+                if(!this.faceDetection) {
+                    try {
+                        this.faceDetection = new FaceDetection({locateFile: (file) => {
+                            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`;
+                        }});
+                        this.faceDetection.setOptions({
+                            model: 'short',
+                            minDetectionConfidence: 0.5
+                        });
+                        this.faceDetection.onResults((results) => {
+                            if (results.detections && results.detections.length > 0) {
+                                this.lastFaceTime = Date.now();
+                                if(this.isAway) this.resumeActivity();
+                            }
+                        });
+                        this.camera = new Camera(this.videoEl, {
+                            onFrame: async () => {
+                                if(this.enabled && TTS.playing) {
+                                    await this.faceDetection.send({image: this.videoEl});
+                                }
+                            },
+                            width: 320,
+                            height: 240
+                        });
+                    } catch(e) {
+                         console.error("MediaPipe failed to load", e);
+                         toast("Error loading face detection models.");
+                         document.getElementById('toggle-smart-attention').checked = false;
+                         this.enabled = false;
+                         return;
+                    }
+                }
+                
+                this.camera.start();
+                this.lastFaceTime = Date.now();
+                this.checkInterval = setInterval(() => {
+                    if (this.enabled && TTS.playing && !this.isAway) {
+                        // 5 seconds without face triggers away mode
+                        if (Date.now() - this.lastFaceTime > 5000) {
+                            this.triggerAway();
+                        }
+                    }
+                }, 1000);
+            },
+            stopTracker() {
+                if(this.camera) this.camera.stop();
+                if(this.checkInterval) clearInterval(this.checkInterval);
+            },
+            triggerAway() {
+                this.isAway = true;
+                TTS.pause();
+                document.getElementById('smart-attention-overlay').style.display = 'flex';
+            },
+            resumeActivity() {
+                if(this.isAway) {
+                    this.isAway = false;
+                    document.getElementById('smart-attention-overlay').style.display = 'none';
+                    // We only resume TTS if it is supposed to be playing but isn't
+                    if(document.getElementById('tts-bar').classList.contains('visible') && !TTS.playing && TTS.sentIdx > 0) {
+                        TTS.play();
+                    }
+                }
             }
         };
 
@@ -4210,6 +4367,7 @@
             Library.init();
             Customizer.init();
             TTS.init();
+            SmartAttention.init();
             HLToolbar.init();
             FileUpload.init();
             initLibTabs();
