@@ -3732,6 +3732,11 @@
                     const p = parseInt(e.target.value);
                     if (p >= 1 && p <= this.pdfPages.length) this.goToPDFPage(p);
                 });
+
+                // Trigger reader onboarding tour for first-time readers
+                if (typeof window.startReaderTour === 'function') {
+                    setTimeout(() => window.startReaderTour(), 800);
+                }
             },
 
             renderText(content) {
@@ -4803,6 +4808,192 @@
 
         // Expose startTour globally for testing
         window.startOnboardingTour = startTour;
+    })();
+    </script>
+
+    <!-- ===== READER ONBOARDING TOUR ===== -->
+    <script>
+    (function() {
+        const READER_STEPS = [
+            {
+                target: '#reading-text',
+                icon: '📖',
+                title: 'Your Reading Area',
+                desc: 'This is where your book content appears. You can select any text to highlight it, or double-click a word to get an AI explanation!',
+                position: 'top'
+            },
+            {
+                target: '#ai-tools-panel',
+                icon: '✨',
+                title: 'AI Reading Assistant',
+                desc: 'Use AI to simplify complex text, break it into bullet points, or simplify just your selected text. Your personal reading helper!',
+                position: 'top'
+            },
+            {
+                target: '.ai-translate-section',
+                icon: '🌐',
+                title: 'Translate Text',
+                desc: 'Translate the entire page into Kannada, Malayalam, Telugu, or Hindi with one click. Read in your preferred language!',
+                position: 'top'
+            },
+            {
+                target: '#settings-panel',
+                icon: '🎨',
+                title: 'Reading Settings',
+                desc: 'Customize font size, letter spacing, line height, reading font, and color themes. Make reading comfortable for you!',
+                position: 'left'
+            },
+            {
+                target: '#btn-tts-toggle',
+                icon: '🔊',
+                title: 'Listen While You Read',
+                desc: 'Click this to hear the text read aloud with word-by-word highlighting. Use the ruler 📏 and focus 🎯 buttons nearby too!',
+                position: 'bottom'
+            },
+            {
+                target: '#back-btn',
+                icon: '⬅️',
+                title: 'Back to Library',
+                desc: 'Click here anytime to return to your library. Your reading progress is saved automatically. Happy reading!',
+                position: 'bottom'
+            }
+        ];
+
+        let rCurrentStep = 0;
+        let rPrevTarget = null;
+
+        function rShowStep(index) {
+            const overlay = document.getElementById('onboarding-overlay');
+            const tooltip = document.getElementById('onboarding-tooltip');
+            const arrow = document.getElementById('onboarding-arrow');
+            const titleEl = document.getElementById('onboarding-title');
+            const descEl = document.getElementById('onboarding-desc');
+            const iconEl = document.getElementById('onboarding-icon');
+            const badgeEl = document.getElementById('onboarding-step-badge');
+            const dotsEl = document.getElementById('onboarding-dots');
+            const nextBtn = document.getElementById('onboarding-next');
+
+            if (rPrevTarget) {
+                rPrevTarget.classList.remove('onboarding-spotlight');
+                rPrevTarget.style.position = '';
+            }
+
+            const step = READER_STEPS[index];
+            const targetEl = document.querySelector(step.target);
+            if (!targetEl) { rEndTour(); return; }
+
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            setTimeout(() => {
+                const savedPos = window.getComputedStyle(targetEl).position;
+                if (savedPos === 'static') targetEl.style.position = 'relative';
+                targetEl.classList.add('onboarding-spotlight');
+                rPrevTarget = targetEl;
+
+                iconEl.textContent = step.icon;
+                titleEl.textContent = step.title;
+                descEl.textContent = step.desc;
+                badgeEl.textContent = `Step ${index + 1} of ${READER_STEPS.length}`;
+
+                // Build dots
+                dotsEl.innerHTML = '';
+                READER_STEPS.forEach((_, i) => {
+                    const d = document.createElement('div');
+                    d.className = 'onboarding-dot' + (i === index ? ' active' : (i < index ? ' done' : ''));
+                    dotsEl.appendChild(d);
+                });
+
+                if (index === READER_STEPS.length - 1) {
+                    nextBtn.innerHTML = 'Start Reading 📚';
+                } else {
+                    nextBtn.innerHTML = 'Next <span>→</span>';
+                }
+
+                tooltip.classList.remove('visible');
+
+                // Position tooltip
+                const rect = targetEl.getBoundingClientRect();
+                const tw = tooltip.offsetWidth;
+                const th = tooltip.offsetHeight;
+                let top, left;
+
+                if (step.position === 'bottom') {
+                    top = rect.bottom + 16;
+                    left = rect.left + rect.width / 2 - tw / 2;
+                    arrow.className = 'onboarding-tooltip-arrow arrow-top';
+                } else if (step.position === 'left') {
+                    top = rect.top + rect.height / 2 - th / 2;
+                    left = rect.left - tw - 16;
+                    arrow.className = 'onboarding-tooltip-arrow arrow-top';
+                    arrow.style.display = 'none';
+                } else {
+                    top = rect.top - th - 16;
+                    left = rect.left + rect.width / 2 - tw / 2;
+                    arrow.className = 'onboarding-tooltip-arrow arrow-bottom';
+                }
+
+                left = Math.max(12, Math.min(left, window.innerWidth - tw - 12));
+                top = Math.max(12, Math.min(top, window.innerHeight - th - 12));
+                tooltip.style.top = top + 'px';
+                tooltip.style.left = left + 'px';
+
+                if (step.position !== 'left') {
+                    arrow.style.display = '';
+                    const arrowLeft = Math.max(20, Math.min(rect.left + rect.width / 2 - left - 7, tw - 30));
+                    arrow.style.left = arrowLeft + 'px';
+                }
+
+                requestAnimationFrame(() => tooltip.classList.add('visible'));
+            }, 350);
+        }
+
+        function rEndTour() {
+            if (rPrevTarget) {
+                rPrevTarget.classList.remove('onboarding-spotlight');
+                rPrevTarget.style.position = '';
+            }
+            document.getElementById('onboarding-overlay').classList.remove('active');
+            document.getElementById('onboarding-tooltip').classList.remove('visible');
+            localStorage.setItem('neuroread_reader_onboarded', 'true');
+        }
+
+        // Hijack next/skip for reader tour
+        let rTourActive = false;
+
+        window.startReaderTour = function() {
+            if (localStorage.getItem('neuroread_reader_onboarded') === 'true') return;
+            rTourActive = true;
+            rCurrentStep = 0;
+            document.getElementById('onboarding-overlay').classList.add('active');
+
+            // Override next/skip handlers
+            const nextBtn = document.getElementById('onboarding-next');
+            const skipBtn = document.getElementById('onboarding-skip');
+
+            const nextHandler = () => {
+                rCurrentStep++;
+                if (rCurrentStep >= READER_STEPS.length) {
+                    rEndTour();
+                    cleanup();
+                } else {
+                    rShowStep(rCurrentStep);
+                }
+            };
+            const skipHandler = () => {
+                rEndTour();
+                cleanup();
+            };
+            function cleanup() {
+                rTourActive = false;
+                nextBtn.removeEventListener('click', nextHandler);
+                skipBtn.removeEventListener('click', skipHandler);
+            }
+
+            nextBtn.addEventListener('click', nextHandler);
+            skipBtn.addEventListener('click', skipHandler);
+
+            rShowStep(0);
+        };
     })();
     </script>
 
