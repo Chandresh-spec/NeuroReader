@@ -2376,6 +2376,219 @@
         .agentic-close:hover {
             color: var(--text-primary);
         }
+
+        /* =====================================================
+           ONBOARDING TOUR
+           ===================================================== */
+        #onboarding-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9500;
+            background: rgba(0, 0, 0, 0.65);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        #onboarding-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .onboarding-spotlight {
+            position: relative;
+            z-index: 9600 !important;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6), 0 0 30px 8px rgba(74, 124, 89, 0.35);
+            border-radius: var(--radius-md);
+            transition: box-shadow 0.4s ease;
+            animation: onboardingPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes onboardingPulse {
+            0%, 100% { box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6), 0 0 30px 8px rgba(74, 124, 89, 0.35); }
+            50% { box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6), 0 0 40px 14px rgba(74, 124, 89, 0.5); }
+        }
+
+        .onboarding-tooltip {
+            position: fixed;
+            z-index: 9700;
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            padding: 0;
+            width: 360px;
+            max-width: 92vw;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(74, 124, 89, 0.15);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            pointer-events: none;
+        }
+
+        .onboarding-tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .onboarding-tooltip-arrow {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            transform: rotate(45deg);
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .onboarding-tooltip-arrow.arrow-top {
+            top: -8px;
+            left: 32px;
+            border-top: 2px solid var(--accent);
+            border-left: 2px solid var(--accent);
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .onboarding-tooltip-arrow.arrow-bottom {
+            bottom: -8px;
+            left: 32px;
+            transform: rotate(225deg);
+        }
+
+        .onboarding-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 22px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .onboarding-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(74, 124, 89, 0.3);
+        }
+
+        .onboarding-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.25;
+        }
+
+        .onboarding-step-badge {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-light);
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 3px;
+            display: inline-block;
+        }
+
+        .onboarding-body {
+            padding: 14px 22px 18px;
+        }
+
+        .onboarding-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.65;
+        }
+
+        .onboarding-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px 18px;
+            gap: 10px;
+        }
+
+        .onboarding-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .onboarding-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .onboarding-dot.active {
+            background: var(--accent);
+            width: 22px;
+            border-radius: 4px;
+        }
+
+        .onboarding-dot.done {
+            background: var(--accent);
+            opacity: 0.5;
+        }
+
+        .onboarding-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .onboarding-btn-skip {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: transparent;
+            color: var(--text-muted);
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .onboarding-btn-skip:hover {
+            border-color: var(--text-muted);
+            color: var(--text-secondary);
+        }
+
+        .onboarding-btn-next {
+            padding: 8px 20px;
+            border: none;
+            border-radius: var(--radius-md);
+            background: var(--accent);
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .onboarding-btn-next:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(74, 124, 89, 0.35);
+        }
+
+        /* Confetti burst on completion */
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(120px) rotate(360deg); opacity: 0; }
+        }
     </style>
 </head>
 
@@ -4354,6 +4567,243 @@
         };
 
 
+    </script>
+
+    <!-- ===== ONBOARDING TOUR ===== -->
+    <div id="onboarding-overlay"></div>
+    <div class="onboarding-tooltip" id="onboarding-tooltip">
+        <div class="onboarding-tooltip-arrow arrow-top" id="onboarding-arrow"></div>
+        <div class="onboarding-header">
+            <div class="onboarding-icon" id="onboarding-icon">👋</div>
+            <div>
+                <div class="onboarding-title" id="onboarding-title">Welcome!</div>
+                <span class="onboarding-step-badge" id="onboarding-step-badge">Step 1 of 8</span>
+            </div>
+        </div>
+        <div class="onboarding-body">
+            <p class="onboarding-desc" id="onboarding-desc">Let's explore everything NeuroRead can do for you.</p>
+        </div>
+        <div class="onboarding-footer">
+            <div class="onboarding-dots" id="onboarding-dots"></div>
+            <div class="onboarding-actions">
+                <button class="onboarding-btn-skip" id="onboarding-skip">Skip Tour</button>
+                <button class="onboarding-btn-next" id="onboarding-next">Next <span>→</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const TOUR_STEPS = [
+            {
+                target: '.welcome-band',
+                icon: '👋',
+                title: 'Welcome to NeuroRead!',
+                desc: 'This is your personal reading dashboard. Let\'s take a quick tour through all the powerful features available to you!',
+                position: 'bottom'
+            },
+            {
+                target: '.nav-search',
+                icon: '🔍',
+                title: 'Search the Library',
+                desc: 'Instantly find any book by title, author, or keyword. Start typing and results appear in real time.',
+                position: 'bottom'
+            },
+            {
+                target: '#btn-nav-upload',
+                icon: '📂',
+                title: 'Upload Your Own Files',
+                desc: 'Bring your own PDFs, TXT, Markdown, or HTML files. All of NeuroRead\'s reading tools work on your uploads too!',
+                position: 'bottom'
+            },
+            {
+                target: '#btn-tts-toggle',
+                icon: '🔊',
+                title: 'Text to Speech',
+                desc: 'Listen to any book read aloud with word-by-word highlighting. Perfect for auditory learners or when your eyes need a break.',
+                position: 'bottom'
+            },
+            {
+                target: '#btn-ruler',
+                icon: '📏',
+                title: 'Reading Ruler',
+                desc: 'Enable a horizontal ruler that follows your cursor to help track the current line — great for focus and comprehension.',
+                position: 'bottom'
+            },
+            {
+                target: '#btn-focus',
+                icon: '🎯',
+                title: 'Focus Mode',
+                desc: 'Dims surrounding text so you can concentrate on one sentence at a time. Reduces visual distractions while reading.',
+                position: 'bottom'
+            },
+            {
+                target: '#btn-settings',
+                icon: '⚙️',
+                title: 'Customize Everything',
+                desc: 'Change themes, fonts, font size, line spacing, letter spacing, and many more accessibility settings to suit your needs.',
+                position: 'bottom'
+            },
+            {
+                target: '.books-grid',
+                icon: '📚',
+                title: 'Your Library',
+                desc: 'Browse the built-in collection of books. Click any book card to start reading with all the tools you just learned about!',
+                position: 'top'
+            }
+        ];
+
+        let currentStep = 0;
+        let prevTarget = null;
+        const overlay = document.getElementById('onboarding-overlay');
+        const tooltip = document.getElementById('onboarding-tooltip');
+        const arrow = document.getElementById('onboarding-arrow');
+        const titleEl = document.getElementById('onboarding-title');
+        const descEl = document.getElementById('onboarding-desc');
+        const iconEl = document.getElementById('onboarding-icon');
+        const badgeEl = document.getElementById('onboarding-step-badge');
+        const dotsEl = document.getElementById('onboarding-dots');
+        const nextBtn = document.getElementById('onboarding-next');
+        const skipBtn = document.getElementById('onboarding-skip');
+
+        function buildDots() {
+            dotsEl.innerHTML = '';
+            TOUR_STEPS.forEach((_, i) => {
+                const d = document.createElement('div');
+                d.className = 'onboarding-dot' + (i === currentStep ? ' active' : (i < currentStep ? ' done' : ''));
+                dotsEl.appendChild(d);
+            });
+        }
+
+        function positionTooltip(targetEl, position) {
+            const rect = targetEl.getBoundingClientRect();
+            const tw = tooltip.offsetWidth;
+            const th = tooltip.offsetHeight;
+            let top, left;
+
+            if (position === 'bottom') {
+                top = rect.bottom + 16;
+                left = rect.left + rect.width / 2 - tw / 2;
+                arrow.className = 'onboarding-tooltip-arrow arrow-top';
+            } else {
+                top = rect.top - th - 16;
+                left = rect.left + rect.width / 2 - tw / 2;
+                arrow.className = 'onboarding-tooltip-arrow arrow-bottom';
+            }
+
+            // Clamp to viewport
+            left = Math.max(12, Math.min(left, window.innerWidth - tw - 12));
+            top = Math.max(12, Math.min(top, window.innerHeight - th - 12));
+
+            tooltip.style.top = top + 'px';
+            tooltip.style.left = left + 'px';
+
+            // Adjust arrow horizontal position
+            const arrowLeft = Math.max(20, Math.min(rect.left + rect.width / 2 - left - 7, tw - 30));
+            arrow.style.left = arrowLeft + 'px';
+        }
+
+        function showStep(index) {
+            // Clear previous spotlight
+            if (prevTarget) {
+                prevTarget.classList.remove('onboarding-spotlight');
+                prevTarget.style.position = '';
+            }
+
+            const step = TOUR_STEPS[index];
+            const targetEl = document.querySelector(step.target);
+            if (!targetEl) { endTour(); return; }
+
+            // Scroll target into view
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            setTimeout(() => {
+                // Add spotlight
+                const savedPos = window.getComputedStyle(targetEl).position;
+                if (savedPos === 'static') targetEl.style.position = 'relative';
+                targetEl.classList.add('onboarding-spotlight');
+                prevTarget = targetEl;
+
+                // Update tooltip content
+                iconEl.textContent = step.icon;
+                titleEl.textContent = step.title;
+                descEl.textContent = step.desc;
+                badgeEl.textContent = `Step ${index + 1} of ${TOUR_STEPS.length}`;
+                buildDots();
+
+                // Update button text
+                if (index === TOUR_STEPS.length - 1) {
+                    nextBtn.innerHTML = 'Finish 🎉';
+                } else {
+                    nextBtn.innerHTML = 'Next <span>→</span>';
+                }
+
+                // Hide tooltip briefly for repositioning
+                tooltip.classList.remove('visible');
+                requestAnimationFrame(() => {
+                    positionTooltip(targetEl, step.position);
+                    requestAnimationFrame(() => {
+                        tooltip.classList.add('visible');
+                    });
+                });
+            }, 350);
+        }
+
+        function endTour() {
+            if (prevTarget) {
+                prevTarget.classList.remove('onboarding-spotlight');
+                prevTarget.style.position = '';
+            }
+            overlay.classList.remove('active');
+            tooltip.classList.remove('visible');
+            localStorage.setItem('neuroread_onboarded', 'true');
+            localStorage.removeItem('neuroread_first_login');
+
+            // Celebration burst
+            celebrateTour();
+        }
+
+        function celebrateTour() {
+            const colors = ['#4a7c59', '#fbbf24', '#38bdf8', '#f472b6', '#34d399', '#a78bfa'];
+            for (let i = 0; i < 30; i++) {
+                const c = document.createElement('div');
+                c.style.cssText = `position:fixed;width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;border-radius:${Math.random()>.5?'50%':'2px'};background:${colors[i%colors.length]};left:${Math.random()*100}vw;top:-10px;z-index:9999;pointer-events:none;animation:confettiFall ${1+Math.random()*1.5}s ${Math.random()*0.5}s ease-out forwards;`;
+                document.body.appendChild(c);
+                c.addEventListener('animationend', () => c.remove());
+            }
+        }
+
+        function startTour() {
+            currentStep = 0;
+            overlay.classList.add('active');
+            showStep(0);
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentStep++;
+            if (currentStep >= TOUR_STEPS.length) {
+                endTour();
+            } else {
+                showStep(currentStep);
+            }
+        });
+
+        skipBtn.addEventListener('click', () => {
+            endTour();
+        });
+
+        // Auto-trigger for first-time users
+        window.addEventListener('DOMContentLoaded', () => {
+            const isFirstLogin = localStorage.getItem('neuroread_first_login') === 'true';
+            const alreadyOnboarded = localStorage.getItem('neuroread_onboarded') === 'true';
+            if (isFirstLogin && !alreadyOnboarded) {
+                setTimeout(() => startTour(), 1200);
+            }
+        });
+
+        // Expose startTour globally for testing
+        window.startOnboardingTour = startTour;
+    })();
     </script>
 
 </body>

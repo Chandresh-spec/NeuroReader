@@ -2032,6 +2032,7 @@
                 if (res.ok) {
                     localStorage.setItem('access_token', data.tokens.access);
                     localStorage.setItem('refresh_token', data.tokens.refresh);
+                    localStorage.setItem('neuroread_first_login', 'true');
                     burst(btn);
                     showAlert('success', '✓ Account created! Redirecting to login…');
                     e.target.reset(); pwStrength('');
