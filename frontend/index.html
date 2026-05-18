@@ -502,10 +502,11 @@
             transition: all var(--transition)
         }
 
-        .stat-chip:hover {
+        .stat-chip:hover, .stat-chip.active {
             border-color: var(--accent);
             background: var(--accent-light);
-            color: var(--accent)
+            color: var(--accent);
+            box-shadow: var(--shadow-sm);
         }
 
         .stat-chip strong {
@@ -1599,6 +1600,43 @@
             align-self: flex-end
         }
 
+        .mark-read-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            background: linear-gradient(135deg, #2d8a4e, #1a6b37);
+            color: #fff;
+            border: 2px solid transparent;
+            border-radius: 30px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 16px 0 8px;
+            box-shadow: 0 4px 15px rgba(45, 138, 78, 0.3);
+            letter-spacing: 0.02em
+        }
+
+        .mark-read-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 138, 78, 0.45);
+            background: linear-gradient(135deg, #34a058, #228b44)
+        }
+
+        .mark-read-btn.is-read {
+            background: linear-gradient(135deg, #1a5c30, #0f3d1f);
+            border-color: #2d8a4e;
+            box-shadow: 0 2px 10px rgba(45, 138, 78, 0.2);
+            cursor: default
+        }
+
+        .mark-read-btn.is-read:hover {
+            transform: none;
+            box-shadow: 0 2px 10px rgba(45, 138, 78, 0.2)
+        }
+
         .note-save-btn:hover {
             background: var(--accent-hover)
         }
@@ -2649,9 +2687,9 @@
                 <button class="icon-btn" id="btn-tts-toggle" data-tooltip="Text to Speech" aria-label="Toggle TTS"
                     aria-pressed="false">🔊</button>
                 <button class="icon-btn" id="btn-ruler" data-tooltip="Reading Ruler" aria-label="Toggle ruler"
-                    aria-pressed="false">📏</button>
+                    aria-pressed="false" style="display: none !important;">📏</button>
                 <button class="icon-btn" id="btn-focus" data-tooltip="Focus Mode" aria-label="Toggle focus mode"
-                    aria-pressed="false">🎯</button>
+                    aria-pressed="false" style="display: none !important;">🎯</button>
                 <button class="icon-btn" id="btn-settings" data-tooltip="Customize" aria-label="Open settings panel"
                     aria-pressed="false">⚙️</button>
                 <!-- User info + logout -->
@@ -2686,7 +2724,7 @@
             </div>
 
             <div class="stats-bar" id="stats-bar" role="status" aria-label="Reading statistics">
-                <button class="stat-chip" id="chip-library">📚 <strong id="stat-total">12</strong> Library</button>
+                <button class="stat-chip active" id="chip-library">📚 <strong id="stat-total">12</strong> Library</button>
                 <button class="stat-chip" id="chip-myfiles">📂 <strong id="stat-uploads">0</strong> My Files</button>
                 <button class="stat-chip" id="chip-read">✅ <strong id="stat-read">0</strong> Read</button>
                 <button class="stat-chip" id="chip-saved">🔖 <strong id="stat-bookmarks">0</strong> Saved</button>
@@ -2771,6 +2809,10 @@
                         <span id="meta-pages-wrap" style="display:none">📄 Page <strong id="meta-page-cur">1</strong> /
                             <strong id="meta-page-tot">1</strong></span>
                     </div>
+                    <button class="mark-read-btn" id="btn-mark-read" aria-label="Mark this book as read">
+                        <span id="mark-read-icon">✅</span>
+                        <span id="mark-read-label">Mark as Read</span>
+                    </button>
                 </div>
 
                 <div id="reading-text" tabindex="0" role="region"
@@ -2889,8 +2931,6 @@
                 <div class="panel-tabs" role="tablist">
                     <button class="panel-tab active" data-tab="reading" role="tab" aria-selected="true">Reading</button>
                     <button class="panel-tab" data-tab="tools" role="tab" aria-selected="false">Tools</button>
-                    <button class="panel-tab" data-tab="notes" role="tab" aria-selected="false">Notes</button>
-                    <button class="panel-tab" data-tab="saved" role="tab" aria-selected="false">Saved</button>
                 </div>
 
                 <!-- Reading Tab -->
@@ -3031,38 +3071,16 @@
                     </div>
                 </div>
 
-                <!-- Notes Tab -->
-                <div class="panel-content" id="tab-notes" role="tabpanel">
-                    <div class="panel-section">
-                        <div class="panel-section-label">Add a Note</div>
-                        <div class="note-input-area">
-                            <textarea id="quick-note" placeholder="Write a note..."
-                                aria-label="Write a note"></textarea>
-                            <button class="note-save-btn" id="save-quick-note">Save Note</button>
-                        </div>
-                    </div>
-                    <div class="panel-section">
-                        <div class="panel-section-label">Your Notes</div>
-                        <div class="notes-area" id="notes-area">
-                            <p class="no-items">No notes yet.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Saved Tab -->
-                <div class="panel-content" id="tab-saved" role="tabpanel">
-                    <div class="panel-section">
-                        <div class="panel-section-label">Bookmarks</div>
-                        <div class="bookmarks-area" id="bookmarks-area">
-                            <p class="no-items">No bookmarks yet.</p>
-                        </div>
-                    </div>
-                    <div class="panel-section" style="margin-top:14px">
-                        <div class="panel-section-label">Recent History</div>
-                        <div class="bookmarks-area" id="history-area">
-                            <p class="no-items">No history yet.</p>
-                        </div>
-                    </div>
+                <!-- Hidden elements for JS compatibility -->
+                <div style="display:none">
+                    <textarea id="quick-note"></textarea>
+                    <button id="save-quick-note"></button>
+                    <div id="notes-area"></div>
+                    <div id="saved-notes-area"></div>
+                    <div id="bookmarks-area"></div>
+                    <div id="history-area"></div>
+                    <div class="panel-content" id="tab-notes"></div>
+                    <div class="panel-content" id="tab-saved"></div>
                 </div>
             </aside>
         </div><!-- /reader-view -->
@@ -3262,6 +3280,13 @@
                     currentLibTab = tab.dataset.libTab;
                     document.getElementById('tab-library-content').style.display = currentLibTab === 'library' ? 'block' : 'none';
                     document.getElementById('tab-myfiles-content').style.display = currentLibTab === 'myfiles' ? 'block' : 'none';
+                    
+                    // Reset filter on tab change
+                    Library.filter = 'all';
+                    document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active'));
+                    document.getElementById('chip-library').classList.add('active');
+                    Library.render();
+
                     if (currentLibTab === 'myfiles') FileUpload.renderGrid();
                 });
             });
@@ -3269,7 +3294,7 @@
 
         /* ── LIBRARY ───────────────────────────────────────────────── */
         const Library = {
-            cat: 'all', q: '',
+            cat: 'all', q: '', filter: 'all',
             init() { this.render(); this.setupSearch(); this.setupCats(); document.getElementById('brand-link').addEventListener('click', e => { e.preventDefault(); Reader.close(); }); },
             render() {
                 const grid = document.getElementById('books-grid');
@@ -3299,7 +3324,52 @@
                 grid.querySelectorAll('.bookmark-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); Bookmarks.toggle(parseInt(btn.dataset.bmId)); Library.render(); }));
                 this.updateStats();
             },
-            filtered() { return BOOKS.filter(b => { const mc = this.cat === 'all' || b.category === this.cat; const q = this.q.toLowerCase(); const ms = !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || b.tags.some(t => t.includes(q)); return mc && ms; }); },
+            filtered() {
+                const bm = DS.bookmarks();
+                const prog = DS.progress();
+                const hlAll = DS.highlights();
+                const notesAll = DS.notes();
+                return BOOKS.filter(b => {
+                    const mc = this.cat === 'all' || b.category === this.cat;
+                    const q = this.q.toLowerCase();
+                    const ms = !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || b.tags.some(t => t.includes(q));
+                    
+                    let mf = true;
+                    if (this.filter === 'read') {
+                        mf = (prog[b.id] || 0) >= 95;
+                    } else if (this.filter === 'saved') {
+                        mf = bm.some(x => String(x) === String(b.id));
+                    } else if (this.filter === 'highlights') {
+                        mf = (hlAll[b.id] || []).length > 0 || (notesAll[b.id] || []).length > 0;
+                    }
+                    return mc && ms && mf;
+                });
+            },
+            setFilter(type) {
+                if (currentLibTab !== 'library') {
+                    document.querySelectorAll('.lib-tab').forEach(t => { t.classList.toggle('active', t.dataset.libTab === 'library'); t.setAttribute('aria-selected', t.dataset.libTab === 'library'); });
+                    currentLibTab = 'library';
+                    document.getElementById('tab-library-content').style.display = 'block';
+                    document.getElementById('tab-myfiles-content').style.display = 'none';
+                }
+
+                if (this.filter === type) {
+                    this.filter = 'all';
+                } else {
+                    this.filter = type;
+                }
+
+                document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active'));
+                if (this.filter !== 'all') {
+                    const chipId = `chip-${this.filter === 'highlights' ? 'highlights' : (this.filter === 'saved' ? 'saved' : (this.filter === 'read' ? 'read' : 'library'))}`;
+                    const activeChip = document.getElementById(chipId);
+                    if (activeChip) activeChip.classList.add('active');
+                } else {
+                    document.getElementById('chip-library').classList.add('active');
+                }
+
+                this.render();
+            },
             setupSearch() { const i = document.getElementById('search-input'); let t; i.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { this.q = i.value; this.render(); if (currentLibTab === 'myfiles') FileUpload.renderGrid(i.value); }, 200); }); },
             setupCats() { document.querySelectorAll('.cat-btn').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('.cat-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); }); btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); this.cat = btn.dataset.category; this.render(); }); }); },
             updateStats() {
@@ -3566,14 +3636,63 @@
             delay(ms) { return new Promise(r => setTimeout(r, ms)); }
         };
 
+        async function syncReadingDataToServer() {
+            if (!Reader.current || !Reader.current.isUserFile) return;
+            const fileId = Reader.current.id;
+            
+            const prog = DS.progress()[fileId] || 0;
+            const allBm = DS.bookmarks();
+            const bookmarked = allBm.some(x => String(x) === String(fileId));
+            const highlights = DS.highlights()[fileId] || [];
+            const notes = DS.notes()[fileId] || [];
+            const pdfPage = Reader.currentPDFPage || 1;
+
+            try {
+                await apiFetch(`/api/library/files/${fileId}/data/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        progress: prog,
+                        pdf_page: pdfPage,
+                        bookmarked: bookmarked,
+                        highlights: highlights,
+                        notes: notes
+                    })
+                });
+            } catch (e) {
+                console.error("Failed to sync reading data to server:", e);
+            }
+        }
+
         /* ── BOOKMARKS ─────────────────────────────────────────────── */
         const Bookmarks = {
             toggle(id) {
                 let bm = DS.bookmarks();
-                if (bm.includes(id)) { bm = bm.filter(x => x !== id); toast('Bookmark removed'); }
-                else { bm.push(id); toast('📌 Bookmarked!'); }
+                const idStr = String(id);
+                const exists = bm.some(x => String(x) === idStr);
+                if (exists) {
+                    bm = bm.filter(x => String(x) !== idStr);
+                    toast('Bookmark removed');
+                } else {
+                    const parsed = parseInt(id);
+                    bm.push(isNaN(parsed) ? id : parsed);
+                    toast('📌 Bookmarked!');
+                }
                 DS.saveBM(bm);
                 this.renderPanel(); Library.updateStats();
+                
+                if (Reader.current && String(Reader.current.id) === idStr && Reader.current.isUserFile) {
+                    syncReadingDataToServer();
+                } else if (DS.userFiles().some(f => String(f.id) === idStr)) {
+                    try {
+                        const bookmarked = !exists;
+                        apiFetch(`/api/library/files/${idStr}/data/`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ bookmarked: bookmarked })
+                        });
+                    } catch (e) {
+                        console.error("Failed to sync bookmark state:", e);
+                    }
+                }
             },
             renderPanel() {
                 const area = document.getElementById('bookmarks-area');
@@ -3581,7 +3700,7 @@
                 if (!bm.length) { area.innerHTML = '<p class="no-items">No bookmarks yet.</p>'; return; }
                 const allBooks = [...BOOKS, ...DS.userFiles()];
                 area.innerHTML = bm.map(id => {
-                    const b = allBooks.find(x => x.id === id || x.id === id);
+                    const b = allBooks.find(x => String(x.id) === String(id));
                     if (!b) return '';
                     const pct = prog[b.id] || 0;
                     return `<div class="bookmark-item" data-book-id="${b.id}" role="button" tabindex="0">
@@ -3591,7 +3710,7 @@
       </div>`;
                 }).join('');
                 area.querySelectorAll('.bookmark-item').forEach(el => {
-                    const open = () => { const id = el.dataset.bookId; const uf = DS.userFiles().find(f => f.id === id); if (uf) Reader.openUserFile(id); else Reader.open(parseInt(id)); };
+                    const open = () => { const id = el.dataset.bookId; const uf = DS.userFiles().find(f => String(f.id) === String(id)); if (uf) Reader.openUserFile(id); else Reader.open(parseInt(id)); };
                     el.addEventListener('click', open); el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') open(); });
                 });
                 area.querySelectorAll('[data-bm-rm]').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); this.toggle(btn.dataset.bmRm); Library.render(); }));
@@ -3689,10 +3808,48 @@
                     apiFetch(`/api/library/files/${fileId}/data/`).then(async r => {
                         if (r && r.ok) {
                             const rd = await r.json();
+                            
+                            // Restore progress
+                            if (rd.progress !== undefined) {
+                                const prog = DS.progress();
+                                prog[fileId] = rd.progress;
+                                DS.saveProg(prog);
+                            }
+                            
+                            // Restore bookmark status
+                            const bm = DS.bookmarks();
+                            const isBm = bm.some(x => String(x) === String(fileId));
+                            if (rd.bookmarked && !isBm) {
+                                bm.push(fileId);
+                                DS.saveBM(bm);
+                            } else if (!rd.bookmarked && isBm) {
+                                const updatedBm = bm.filter(x => String(x) !== String(fileId));
+                                DS.saveBM(updatedBm);
+                            }
+                            
+                            // Restore highlights
+                            if (rd.highlights) {
+                                const hl = DS.highlights();
+                                hl[fileId] = rd.highlights;
+                                DS.saveHL(hl);
+                            }
+                            
+                            // Restore notes
+                            if (rd.notes) {
+                                const notes = DS.notes();
+                                notes[fileId] = rd.notes;
+                                DS.saveNotes(notes);
+                            }
+
                             if (rd.pdf_page && this.pdfPages && rd.pdf_page <= this.pdfPages.length) {
                                 this.currentPDFPage = rd.pdf_page;
                                 this.goToPDFPage(rd.pdf_page);
                             }
+                            
+                            // Re-render UI views to reflect restored data
+                            Library.updateStats();
+                            Notes.render();
+                            Bookmarks.renderPanel();
                         }
                     });
 
@@ -3761,6 +3918,7 @@
                 TTS.stop();
                 History.add(book.id);
                 this.updateMeta();
+                updateMarkReadBtn();
 
                 // PDF nav buttons
                 document.getElementById('pdf-prev').addEventListener('click', () => this.pdfPrev());
@@ -3816,6 +3974,10 @@
                     prog[this.current.id + '_page'] = p;
                     prog[this.current.id] = Math.round((p / this.pdfPages.length) * 100);
                     DS.saveProg(prog);
+                    
+                    if (this.current.isUserFile) {
+                        syncReadingDataToServer();
+                    }
                 }
             },
             updatePDFPageUI() {
@@ -3844,8 +4006,16 @@
                 const scrolled = window.scrollY - (textEl.getBoundingClientRect().top + window.scrollY) + window.innerHeight;
                 const pct = Math.min(100, Math.max(0, (scrolled / total) * 100));
                 const prog = DS.progress();
-                prog[this.current.id] = pct;
-                DS.saveProg(prog);
+                const existing = prog[this.current.id] || 0;
+                // Only update if new progress is higher (don't overwrite "Mark as Read" 100%)
+                if (pct > existing) {
+                    prog[this.current.id] = pct;
+                    DS.saveProg(prog);
+                }
+                
+                if (this.current.isUserFile) {
+                    syncReadingDataToServer();
+                }
             },
 
             updateMeta() {
@@ -3948,7 +4118,24 @@
                 if (!this.range) { this.hide(); return; }
                 const node = this.range.commonAncestorContainer;
                 const mark = (node.nodeType === 3 ? node.parentElement : node)?.closest?.('mark');
-                if (mark) { const p = mark.parentNode; while (mark.firstChild) p.insertBefore(mark.firstChild, mark); p.removeChild(mark); }
+                if (mark) {
+                    const hlId = mark.dataset.hlId;
+                    const p = mark.parentNode;
+                    while (mark.firstChild) p.insertBefore(mark.firstChild, mark);
+                    p.removeChild(mark);
+                    
+                    if (Reader.current && hlId) {
+                        const hl = DS.highlights();
+                        const bid = Reader.current.id;
+                        if (hl[bid]) {
+                            hl[bid] = hl[bid].filter(x => String(x.id) !== String(hlId));
+                            DS.saveHL(hl);
+                            if (Reader.current.isUserFile) {
+                                syncReadingDataToServer();
+                            }
+                        }
+                    }
+                }
                 window.getSelection().removeAllRanges();
                 this.hide();
             },
@@ -3958,6 +4145,9 @@
                 if (!hl[bid]) hl[bid] = [];
                 hl[bid].push({ id, cls, text: text.substring(0, 80), ts: Date.now() });
                 DS.saveHL(hl);
+                if (Reader.current.isUserFile) {
+                    syncReadingDataToServer();
+                }
             },
             toNote() {
                 if (!this.sel) return;
@@ -3972,27 +4162,61 @@
 
         /* ── NOTES ─────────────────────────────────────────────────── */
         const Notes = {
+            _formatTime(ts) {
+                if (!ts) return '';
+                const d = new Date(ts);
+                const now = new Date();
+                const diff = now - d;
+                if (diff < 60000) return 'Just now';
+                if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+                if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            },
             render() {
                 const area = document.getElementById('notes-area');
                 if (!Reader.current) { area.innerHTML = '<p class="no-items">Open a book to see notes.</p>'; return; }
                 const all = DS.notes(); const bn = all[Reader.current.id] || [];
-                if (!bn.length) { area.innerHTML = '<p class="no-items">No notes yet. Highlight text and click 📝 Note.</p>'; return; }
+                if (!bn.length) { area.innerHTML = '<p class="no-items">No notes yet. Write a note above or highlight text and click 📝 Note.</p>'; return; }
                 area.innerHTML = bn.map((n, i) => `<div class="note-card">${n.quote ? `<div class="note-quote">"${n.quote}"</div>` : ''}
       <div class="note-text">${n.text}</div>
-      <button class="note-delete" data-ni="${i}">Delete</button></div>`).join('');
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+        <span style="font-size:10px;color:var(--text-muted)">${this._formatTime(n.ts)}</span>
+        <button class="note-delete" data-ni="${i}">Delete</button>
+      </div></div>`).join('');
                 area.querySelectorAll('.note-delete').forEach(btn => btn.addEventListener('click', () => this.del(parseInt(btn.dataset.ni))));
+            },
+            renderSaved() {
+                const area = document.getElementById('saved-notes-area');
+                if (!area) return;
+                if (!Reader.current) { area.innerHTML = '<p class="no-items">Open a book to see your saved notes.</p>'; return; }
+                const all = DS.notes(); const bn = all[Reader.current.id] || [];
+                if (!bn.length) { area.innerHTML = '<p class="no-items">No saved notes for this book yet.</p>'; return; }
+                area.innerHTML = `<div style="font-size:11px;color:var(--accent);margin-bottom:8px;font-weight:600">${bn.length} note${bn.length > 1 ? 's' : ''} for "${Reader.current.title}"</div>` +
+                    bn.map((n, i) => `<div class="note-card">${n.quote ? `<div class="note-quote">"${n.quote}"</div>` : ''}
+      <div class="note-text">${n.text}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+        <span style="font-size:10px;color:var(--text-muted)">${this._formatTime(n.ts)}</span>
+        <button class="note-delete" data-ni="${i}" data-from="saved">Delete</button>
+      </div></div>`).join('');
+                area.querySelectorAll('.note-delete').forEach(btn => btn.addEventListener('click', () => { this.del(parseInt(btn.dataset.ni)); this.renderSaved(); }));
             },
             save(text, quote = '') {
                 if (!text.trim() || !Reader.current) return;
                 const all = DS.notes(); const id = Reader.current.id;
                 if (!all[id]) all[id] = [];
                 all[id].unshift({ text: text.trim(), quote: quote.substring(0, 80), ts: Date.now() });
-                DS.saveNotes(all); this.render(); toast('📝 Note saved!');
+                DS.saveNotes(all); this.render(); this.renderSaved(); toast('📝 Note saved!');
+                if (Reader.current.isUserFile) {
+                    syncReadingDataToServer();
+                }
             },
             del(idx) {
                 if (!Reader.current) return;
                 const all = DS.notes(); const id = Reader.current.id;
-                all[id].splice(idx, 1); DS.saveNotes(all); this.render(); toast('Note deleted');
+                all[id].splice(idx, 1); DS.saveNotes(all); this.render(); this.renderSaved(); toast('Note deleted');
+                if (Reader.current.isUserFile) {
+                    syncReadingDataToServer();
+                }
             }
         };
 
@@ -4183,14 +4407,23 @@
                 document.getElementById('panel-backdrop').classList.toggle('active', this.open);
                 document.getElementById('btn-settings').classList.toggle('active', this.open);
                 document.getElementById('btn-settings').setAttribute('aria-pressed', this.open);
-                if (this.open) { Notes.render(); Bookmarks.renderPanel(); History.renderPanel(); document.getElementById('settings-panel').focus(); }
+                if (this.open) { Notes.render(); Notes.renderSaved(); Bookmarks.renderPanel(); History.renderPanel(); document.getElementById('settings-panel').focus(); }
             },
             tab(name) {
                 if (!this.open) this.toggle();
-                document.querySelectorAll('.panel-tab').forEach(t => { t.classList.toggle('active', t.dataset.tab === name); t.setAttribute('aria-selected', t.dataset.tab === name); });
-                document.querySelectorAll('.panel-content').forEach(c => c.classList.toggle('active', c.id === `tab-${name}`));
+                const panel = document.getElementById('settings-panel');
+                panel.querySelectorAll('.panel-tab').forEach(t => {
+                    const isActive = t.dataset.tab === name;
+                    t.classList.toggle('active', isActive);
+                    t.setAttribute('aria-selected', String(isActive));
+                });
+                panel.querySelectorAll('.panel-content').forEach(c => {
+                    const isActive = c.id === `tab-${name}`;
+                    c.classList.toggle('active', isActive);
+                    c.style.display = isActive ? 'block' : 'none';
+                });
                 if (name === 'notes') Notes.render();
-                if (name === 'saved') { Bookmarks.renderPanel(); History.renderPanel(); }
+                if (name === 'saved') { Notes.renderSaved(); Bookmarks.renderPanel(); History.renderPanel(); }
             }
         };
 
@@ -4335,9 +4568,35 @@
             const total = el.scrollHeight;
             const scrolled = window.scrollY - (el.getBoundingClientRect().top + window.scrollY) + window.innerHeight;
             const pct = Math.min(100, Math.max(0, (scrolled / total) * 100));
-            document.getElementById('reading-progress').style.width = pct + '%';
-            document.getElementById('meta-progress').textContent = Math.round(pct);
-            if (Reader.current) { const prog = DS.progress(); prog[Reader.current.id] = pct; DS.saveProg(prog); }
+
+            if (Reader.current) {
+                const prog = DS.progress();
+                const existing = prog[Reader.current.id] || 0;
+                const displayPct = Math.max(pct, existing);
+
+                document.getElementById('reading-progress').style.width = displayPct + '%';
+                document.getElementById('meta-progress').textContent = Math.round(displayPct);
+
+                if (pct > existing) {
+                    prog[Reader.current.id] = pct;
+                    DS.saveProg(prog);
+                }
+                updateMarkReadBtn();
+            } else {
+                document.getElementById('reading-progress').style.width = pct + '%';
+                document.getElementById('meta-progress').textContent = Math.round(pct);
+            }
+        }
+
+        function updateMarkReadBtn() {
+            const btn = document.getElementById('btn-mark-read');
+            if (!btn || !Reader.current) return;
+            const prog = DS.progress();
+            const pct = prog[Reader.current.id] || 0;
+            const isRead = pct >= 95;
+            btn.classList.toggle('is-read', isRead);
+            document.getElementById('mark-read-icon').textContent = isRead ? '✓' : '✅';
+            document.getElementById('mark-read-label').textContent = isRead ? 'Marked as Read' : 'Mark as Read';
         }
 
         /* ── TTS BAR VISIBILITY ────────────────────────────────────── */
@@ -4374,14 +4633,14 @@
             initKeyboard();
 
             // Panel tabs
-            document.querySelectorAll('.panel-tab').forEach(tab => { tab.addEventListener('click', () => SettingsPanel.tab(tab.dataset.tab)); });
+            document.getElementById('settings-panel').querySelectorAll('.panel-tab').forEach(tab => { tab.addEventListener('click', () => SettingsPanel.tab(tab.dataset.tab)); });
 
             // Stats chips mapping
-            document.getElementById('chip-library').addEventListener('click', () => document.querySelector('[data-lib-tab="library"]').click());
+            document.getElementById('chip-library').addEventListener('click', () => Library.setFilter('all'));
             document.getElementById('chip-myfiles').addEventListener('click', () => document.querySelector('[data-lib-tab="myfiles"]').click());
-            document.getElementById('chip-read').addEventListener('click', () => document.querySelector('[data-lib-tab="library"]').click()); // Default to library since there is no 'read' filter
-            document.getElementById('chip-saved').addEventListener('click', () => SettingsPanel.tab('saved'));
-            document.getElementById('chip-highlights').addEventListener('click', () => SettingsPanel.tab('notes'));
+            document.getElementById('chip-read').addEventListener('click', () => Library.setFilter('read'));
+            document.getElementById('chip-saved').addEventListener('click', () => Library.setFilter('saved'));
+            document.getElementById('chip-highlights').addEventListener('click', () => Library.setFilter('highlights'));
 
             // Note saving
             document.getElementById('save-quick-note').addEventListener('click', () => {
@@ -4392,6 +4651,20 @@
             document.getElementById('quick-note').addEventListener('keydown', e => { if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); document.getElementById('save-quick-note').click(); } });
 
             document.getElementById('back-btn').addEventListener('click', () => Reader.close());
+
+            // Mark as Read button
+            document.getElementById('btn-mark-read').addEventListener('click', () => {
+                if (!Reader.current) return;
+                const prog = DS.progress();
+                if ((prog[Reader.current.id] || 0) >= 95) return; // already read
+                prog[Reader.current.id] = 100;
+                DS.saveProg(prog);
+                document.getElementById('meta-progress').textContent = '100';
+                document.getElementById('reading-progress').style.width = '100%';
+                updateMarkReadBtn();
+                Library.updateStats();
+                toast('✅ Marked as read!');
+            });
 
             document.getElementById('btn-tts-toggle').addEventListener('click', () => {
                 const btn = document.getElementById('btn-tts-toggle');

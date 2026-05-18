@@ -558,15 +558,15 @@
 
                     <div class="stat-row">
                         <span>Documents Uploaded</span>
-                        <strong>0</strong>
+                        <strong id="statDocsCount">0</strong>
                     </div>
                     <div class="stat-row">
                         <span>Total Reading Time</span>
-                        <strong>0 hrs</strong>
+                        <strong id="statReadingTime">0 hrs</strong>
                     </div>
                     <div class="stat-row">
                         <span>AI Summaries Used</span>
-                        <strong>0</strong>
+                        <strong id="statSummaries">0</strong>
                     </div>
                     <div class="stat-row">
                         <span>Status</span>
@@ -668,6 +668,49 @@
 
                 // Apply initial settings
                 await loadSmartSettings(token);
+
+                // Fetch dynamic files count
+                try {
+                    const filesRes = await fetch("http://127.0.0.1:8000/api/library/files/", {
+                        method: "GET",
+                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
+                    });
+                    if (filesRes.ok) {
+                        const filesData = await filesRes.json();
+                        document.getElementById("statDocsCount").textContent = filesData.length;
+                    }
+                } catch (e) {
+                    console.error("Failed to load dynamic file count", e);
+                }
+
+                // Dynamic stats from localStorage
+                try {
+                    // Notes count
+                    const notesObj = JSON.parse(localStorage.getItem('nr3_notes') || '{}');
+                    let totalNotes = 0;
+                    for (const key in notesObj) {
+                        if (Array.isArray(notesObj[key])) {
+                            totalNotes += notesObj[key].length;
+                        }
+                    }
+                    document.getElementById("statSummaries").textContent = totalNotes;
+
+                    // Reading progress / time estimate
+                    const progressObj = JSON.parse(localStorage.getItem('nr3_prog') || '{}');
+                    let startedBooks = 0;
+                    let completedBooks = 0;
+                    for (const key in progressObj) {
+                        if (!key.endsWith('_page')) {
+                            const pct = progressObj[key];
+                            if (pct > 0) startedBooks++;
+                            if (pct >= 90) completedBooks++;
+                        }
+                    }
+                    const estTime = Math.round((startedBooks * 0.5) + (completedBooks * 1.5));
+                    document.getElementById("statReadingTime").textContent = `${estTime || 0} hrs`;
+                } catch (e) {
+                    console.error("Failed to parse dynamic statistics", e);
+                }
             } catch (err) {
                 document.getElementById("uName").textContent = "Error loading";
             }
