@@ -3116,7 +3116,7 @@
         if (!_token) { window.location.replace('login.html'); }
 
         // ── API HELPER ──────────────────────────────────────────────
-        const API_BASE = 'https://neuroreader-kqqt.onrender.com';
+        const API_BASE = 'http://127.0.0.1:8000';
 
         async function apiFetch(path, options = {}) {
             let token = localStorage.getItem('access_token');
@@ -3646,7 +3646,7 @@
                 document.getElementById('processing-sub').textContent = 'Fetching from server';
 
                 try {
-                    const resp = await apiFetch(servePath.replace(location.origin, '').replace('https://neuroreader-kqqt.onrender.com', ''));
+                    const resp = await apiFetch(servePath.replace(location.origin, '').replace('http://127.0.0.1:8000', ''));
                     if (!resp || !resp.ok) { throw new Error('Could not fetch file'); }
 
                     if (ext === 'PDF') {
@@ -4264,7 +4264,7 @@
                 if (!token) return;
 
                 try {
-                    const res = await fetch("https://neuroreader-kqqt.onrender.com/api/preferences/settings/", {
+                    const res = await fetch("http://127.0.0.1:8000/api/preferences/settings/", {
                         method: "GET",
                         headers: { "Authorization": `Bearer ${token}` }
                     });
