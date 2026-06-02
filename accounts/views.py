@@ -234,7 +234,7 @@ class GoogleAuthCallbackView(APIView):
 
         try:
             # Build the redirect URI (must match what was sent in the auth request)
-            redirect_uri = request.build_absolute_uri('/api/auth/google/callback/')
+            redirect_uri = request.build_absolute_uri('/accounts/google/login/callback/')
 
             # Exchange authorization code for access token
             token_data = urllib.parse.urlencode({

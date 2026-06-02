@@ -3,11 +3,15 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import index, serve_html
+from accounts.views import GoogleAuthCallbackView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', index),
     path('<slug:page>.html', serve_html),
+
+    # Google OAuth callback custom path
+    path('accounts/google/login/callback/', GoogleAuthCallbackView.as_view(), name='google-callback-render'),
 
     # Authentication endpoints
     path("api/auth/", include("accounts.urls")),

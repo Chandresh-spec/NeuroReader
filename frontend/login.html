@@ -1808,8 +1808,8 @@
 
         /* ── Google Auth (OAuth 2.0 Redirect Flow) ── */
         function triggerGoogleLogin() {
-            const clientId = "324923395468-g8ifr4jovo09mik548gnvovv849m2sd6.apps.googleusercontent.com";
-            const redirectUri = encodeURIComponent(window.location.origin + '/api/auth/google/callback/');
+            const clientId = "571536711772-lvumlfrpk4ql0v9l7e1hnja1lm0hgmpo.apps.googleusercontent.com";
+            const redirectUri = encodeURIComponent(window.location.origin + '/accounts/google/login/callback/');
             const scope = encodeURIComponent('email profile');
             const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
             window.location.href = authUrl;
