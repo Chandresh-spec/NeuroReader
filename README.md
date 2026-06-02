@@ -135,11 +135,19 @@ pip install -r requirements.txt
 
 ### 4️⃣ Configure Environment
 
-Create `.env` file:
+Create a `.env` file (or set these as environment variables on Render):
 
-```
-HUGGINGFACE_TOKEN=your_token_here
-SECRET_KEY=your_django_secret
+```env
+# Django Settings
+SECRET_KEY=your_django_secret_here
+DEBUG=False
+
+# HuggingFace API Token (supports HF_API_KEY, HUGGINGFACE_KEY, or HUGGINGFACE_TOKEN)
+HF_API_KEY=your_huggingface_api_token_here
+
+# Google OAuth (Optional)
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 ```
 
 ### 5️⃣ Run Migrations
