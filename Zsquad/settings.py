@@ -22,9 +22,9 @@ SECRET_KEY = os.getenv(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'neuroreader-kqqt.onrender.com']
 
 
 # Application definition
@@ -96,6 +96,11 @@ AUTH_USER_MODEL = "accounts.User"
 # In production, replace with: CORS_ALLOWED_ORIGINS = ["https://yourfrontend.com"]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF trusted origins for Render deployment
+CSRF_TRUSTED_ORIGINS = [
+    'https://neuroreader-kqqt.onrender.com',
+]
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
