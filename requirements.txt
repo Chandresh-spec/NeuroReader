@@ -10,3 +10,4 @@ huggingface-hub>=0.22.0
 deep-translator>=1.11.4
 requests>=2.31.0
 PyJWT>=2.8.0
+openai>=1.14.0

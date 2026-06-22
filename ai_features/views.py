@@ -2,7 +2,8 @@ from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from huggingface_hub import InferenceClient
+from openai import OpenAI
+import os
 import requests
 
 from library.models import UserFile
@@ -17,7 +18,10 @@ from .agent.serializers import OptimizeReadingRequestSerializer, OptimizeReading
 
 def get_hf_client():
     api_key = getattr(settings, "HF_API_KEY", "")
-    return InferenceClient(api_key=api_key, timeout=25)
+    return OpenAI(
+        base_url="https://router.huggingface.co/v1",
+        api_key=api_key or "hf_dummy",
+    )
 
 
 def _err(e: Exception) -> Response:
@@ -48,9 +52,9 @@ class SimplifyView(APIView):
                 {"role": "system", "content": "You are a helpful reading assistant. Simplify the user's text into plain, easy-to-understand language. Do not add any extra conversational filler, just return the simplified text directly."},
                 {"role": "user", "content": f"Simplify this text:\n\n{text}"}
             ]
-            res = client.chat_completion(
+            res = client.chat.completions.create(
                 messages=messages, 
-                model="google/gemma-2-2b-it",
+                model="zai-org/GLM-5.2-FP8:zai-org",
                 max_tokens=600
             )
             output = res.choices[0].message.content.strip()
@@ -76,9 +80,9 @@ class StructureView(APIView):
                 {"role": "system", "content": "You are a helpful reading assistant. Extract the main points from the user's text and format them as a concise bulleted list. Do not add conversational filler. Use a • character for each bullet point."},
                 {"role": "user", "content": f"Format this text as a structural bulleted list:\n\n{text}"}
             ]
-            res = client.chat_completion(
+            res = client.chat.completions.create(
                 messages=messages, 
-                model="google/gemma-2-2b-it",
+                model="zai-org/GLM-5.2-FP8:zai-org",
                 max_tokens=600
             )
             output = res.choices[0].message.content.strip()
