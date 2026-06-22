@@ -95,10 +95,10 @@ class LoginSerializer(serializers.Serializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """
-    Read-only serializer for returning authenticated user profile data.
+    Serializer for returning and updating authenticated user profile data.
     """
 
     class Meta:
         model = User
-        fields = ["id", "email", "full_name", "is_active", "date_joined"]
-        read_only_fields = fields
+        fields = ["id", "email", "full_name", "bio", "profile_picture", "is_active", "date_joined"]
+        read_only_fields = ["id", "email", "is_active", "date_joined"]

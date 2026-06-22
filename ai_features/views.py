@@ -23,7 +23,7 @@ def get_hf_client():
 def _err(e: Exception) -> Response:
     msg = str(e).lower()
     if "model_not_supported" in msg:
-        return Response({"error": "Hugging Face Free Tier no longer supports this Mistral model. Please use a PRO key or switch to a supported model (e.g. Qwen2.5-0.5B-Instruct)."}, status=502)
+        return Response({"error": "Hugging Face Free Tier no longer supports this model. Please use a PRO key or switch to a supported model."}, status=502)
     if "timeout" in msg or "read operation timed out" in msg:
         return Response({"error": "AI model is waking up (cold start). Please try again in 30 seconds."}, status=503)
     if "unauthorized" in msg or "invalid" in msg:
@@ -41,7 +41,7 @@ class SimplifyView(APIView):
         if not text:
             return Response({"error": "No text provided."}, status=400)
 
-        # Use Llama-3.2-1B for simplification (supported on the free tier keys)
+        # Use Gemma-2-2B for simplification (supported on the free tier, no gating)
         try:
             client = get_hf_client()
             messages = [
@@ -50,7 +50,7 @@ class SimplifyView(APIView):
             ]
             res = client.chat_completion(
                 messages=messages, 
-                model="meta-llama/Llama-3.2-1B-Instruct",
+                model="google/gemma-2-2b-it",
                 max_tokens=600
             )
             output = res.choices[0].message.content.strip()
@@ -69,7 +69,7 @@ class StructureView(APIView):
         if not text:
             return Response({"error": "No text provided."}, status=400)
 
-        # Use Llama-3.2-1B for structuring text into bullet points
+        # Use Gemma-2-2B for structuring text into bullet points
         try:
             client = get_hf_client()
             messages = [
@@ -78,7 +78,7 @@ class StructureView(APIView):
             ]
             res = client.chat_completion(
                 messages=messages, 
-                model="meta-llama/Llama-3.2-1B-Instruct",
+                model="google/gemma-2-2b-it",
                 max_tokens=600
             )
             output = res.choices[0].message.content.strip()

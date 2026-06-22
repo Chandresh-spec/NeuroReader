@@ -137,12 +137,13 @@ class LogoutView(APIView):
 
 class ProfileView(APIView):
     """
-    GET /api/auth/profile/
-    Returns the profile of the currently authenticated user.
-    Requires Authorization: Bearer <access_token> header.
+    GET /api/auth/profile/     — returns profile of currently authenticated user
+    PATCH /api/auth/profile/   — updates name, bio, and profile picture
     """
 
     permission_classes = [IsAuthenticated]
+    from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get(self, request):
         serializer = UserProfileSerializer(request.user)
@@ -153,6 +154,19 @@ class ProfileView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+    def patch(self, request):
+        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "message": "Profile updated successfully.",
+                    "user": serializer.data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GoogleLoginView(APIView):
     """
